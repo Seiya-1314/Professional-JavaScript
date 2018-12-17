@@ -3,11 +3,14 @@
 **作者简介：**
 
   Nicholas C. Zakas（尼古拉斯•泽卡斯）世界顶级Web技术专家，现为雅虎公司界面呈现架构师，负责My Yahoo!和雅虎首页等大访问量站点的设计。尼古拉斯拥有丰富的Web开发和界面设计经验，曾经参与许多世界级大公司的Web解决方案开发。他还是High Performance JavaScript一书的作者，并与他人合作撰写了Professional Ajax和Even Faster Web Sites。尼古拉斯拥有梅里马克学院计算机科学学士学位和埃迪柯特学院的MBA学位。他的个人网站是www.nczonline.net，他的Twitter别名是@slicknet。
+
 <br>
 
 **前言：**
 
 记录自己在阅读本书过程中的收获以及思考。
+<br>
+<br>
 <br>
 
 ## 第三章 基本概念
@@ -15,12 +18,14 @@
 #### 一、语法
 
 `ECMAScript` 的语法大量借鉴了 `C` 及其他类 `C` 语言（如 `Java` ）的语法。
+
 <br>
 
 
 ***1. 区分大小写***
 
 - `ECMAScript` 中的一切（变量、函数名和操作符）都要区分大小写。
+
 <br>
 
 ***2. 标识符***
@@ -34,6 +39,7 @@ myCar
 doSomethingImportant
 ```
 虽然没有谁强制要求必须采用这种格式，但为了与 `ECMAScript` 内置的函数和对象命名格式保持一致，可以将其当作一种最佳实践。
+
 <br>
 
 ***3. 语句***
@@ -44,6 +50,7 @@ doSomethingImportant
   2、开发人员可以放心地通过删除多余的空格来压缩 `ECMAScript` 代码（代码行结尾处没有分号会导致压缩错误）；
   3、加上分号也会在某些情况下增进代码的性能，因为解析器不必再花时间推测应该在哪里插入分号了；
 ```
+
 <br>
 
 #### 二、变量
@@ -53,6 +60,7 @@ doSomethingImportant
 - 用 `var` 操作符定义的变量将成为定义该变量的作用域中的局部变量;
 
 - 省略 `var` 操作符可以定义全局变量，但局部作用域中定义的全局变量很难维护;
+
 <br>
 
 #### 三、数据类型
@@ -67,6 +75,8 @@ alert(typeof(message));  // "string"
 alert(typeof 95);        // "number"
 ```
 
+<br>
+
 ***1. Undefined类型***
 
 Undefined类型只有一个值，即特殊的 `undefined`。
@@ -76,6 +86,7 @@ Undefined类型只有一个值，即特殊的 `undefined`。
 - 对未声明的变量执行 `typeof` 操作符将返回 `undefined` 值；
 
 **注意**：显式地初始化变量依然是明智的选择，因为当 `typeof` 操作符返回"undefined"值时， 我们就知道被检测的变量还没有被声明，而不是尚未初始化。
+
 <br>
 
 ***2. Null类型***
@@ -103,6 +114,7 @@ alert(null == undefined);   //true
 ```
 
 尽管 `null` 和 `undefined` 有这样的关系，但它们的用途完全不同。无论在什么情况下，都没有必要把一个变量的值显式地设置为 `undefined`，可是同样的规则对 `null` 却不适用。换句话说，只要意在保存对象的变量还没有真正保存对象，就应该明确地让该变量保存 `null` 值。这样做不仅可以体现 `null` 作为空对象指针的惯例，而且也有助于进一步区分 `null` 和 `undefined`。
+
 <br>
 
 ***3. Boolean类型***
@@ -118,3 +130,7 @@ Boolean类型只有两个字面值：`true` 和 `false`。下表给出了各种�
 | Undefined | N/A | undefined |
 
 这些转换规则对理解流控制语句（如 `if` 语句）自动执行相应的 `Boolean` 转换非常重要，因为错误地使用一个对象而不是一个 `Boolean` 值，就有可能彻底改变应用程序的流程。
+
+<br>
+
+***4. Number类型***
