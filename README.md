@@ -334,7 +334,7 @@ var value4;         alert(String(value4));     // "undefined"
 ```
   constructor：保存着用于创建当前对象的函数，构造函数（constructor）就是 Object()；
   hasOwnProperty(propertyName)：用于检查给定的属性在当前对象实例中（而不是在实例的原型中）  
- 是否存在。其中，作为参数的属性名（propertyName）必须以字符串形式指定（例 如：o.hasOwnProperty("name")）；
+ 是否存在。其中，作为参数的属性名（propertyName）必须以字符串形式指定（例如：o.hasOwnProperty("name")）；
   isPrototypeOf(object)：用于检查传入的对象是否是传入对象的原型；
   propertyIsEnumerable(propertyName)：用于检查给定的属性是否能够使用 for-in 语句来枚举。  
  与 hasOwnProperty()方法一样，作为参数的属性名必须以字符串形式指定；
@@ -452,13 +452,188 @@ JavaScript 的变量与其他语言的变量有很大区别。变量松散类型
 
 ### 一、基本类型和引用类型的值
 
+`ECMAScript` 变量包含两种不同数据类型的值：
+
+- **基本类型值** (简单的数据段)：Undefined、Null、Boolean、Number 和 String；
+- **引用类型值** (由多个值构成的对象)：Object；
+
+**<u><font color="#282828">在将一个值赋给变量时，解析器必须确定这个值是基本类型值还是引用类型值</font></u>** 。基本数据类型是按值访问的，因为可以操作保存在变量中的实际的值，因此被保存在 **栈内存** 中。
+
+引用类型的值是保存在内存中的对象，保存在 **堆内存** 中。包含引用类型值的变量实际上包含的并不是对象本身，而是一个指向该对象的指针。与其他语言不同，**<u><font color="#282828">JavaScript 不允许直接访问内存中的位置，也就是说不能直接操作对象的内存空间</font></u>**。在操作对象时，实际上是在操作对象的引用而不是实际的对象。为此，引用类型的值是按引用访问的。
+
+> 注意：在很多语言中， 字符串以对象的形式来表示， 因此被认为是引用类型的。 ECMAScript 放弃了这一传统。
+
+<br>
+
+***1. 传递参数***
+
+`ECMAScript` 中所有函数的参数都是按值传递的。也就是说，把函数外部的值复制给函数内部的参数，就和把值从一个变量复制到另一个变量一样。举例如下：
+
+```js
+function setName(obj) {
+  obj.name = "Nicholas";
+  obj = new Object();
+  obj.name = "Greg";
+  return obj;
+}
+
+var person1 = new Object();
+var person2 = setName(person1);
+
+alert(person1.name); //"Nicholas"
+alert(person2.name); //"Greg"
+```
+
+> 可以把 ECMAScript 函数的参数想象成局部变量。
+
+<br>
+
+***2. 检测类型***
+
+- 基本类型检测：typeof 操作符；
+- 引用类型检测：instanceof 操作符；
+
+```js
+alert(person instanceof Object);    // 变量 person 是 Object 吗？
+alert(colors instanceof Array);     // 变量 colors 是 Array 吗？
+alert(pattern instanceof RegExp);   // 变量 pattern 是 RegExp 吗？
+```
+
+instanceof 操作符的返回值：`true` 和 `false` ；在检测一个引用类型值和 Object 构造函数时，instanceof 操作符始终会返回 true。如果使用 instanceof 操作符检测基本类型的值，则该操作符始终会返回 false。
+
+<br>
+
+### 二、执行环境及作用域
+
+<br>
+
+参考学习：[理解 JavaScript 作用域和作用域链](http://www.cnblogs.com/lhb25/archive/2011/09/06/javascript-scope-chain.html)
+
+<br>
+
+**<u><font color="red">每个执行环境都有一个与之关联的“变量对象”（variable object），环境中定义的所有变量和函数都保存在这个对象中</font></u>**。全局执行环境是最外围的一个执行环境。
+
+在 Web 浏览器中，全局执行环境被认为是 `window` 对象，因此所有全局变量和函数都是作为 `window` 对象的属性和方法创建的。某个执行环境中的所有代码执行完毕后，该环境被销毁，保存在其中的所有变量和函数定义也随之销毁。
+
+<br>
+
+***1. 作用域链***
+
+当代码在一个环境中执行时，会创建变量对象的一个 **作用域链**（scope chain）。
+
+- **作用域链的用途**：**<u><font color="#282828">保证对执行环境有权访问的所有变量和函数的有序访问</font></u>**。内部环境可以通过作用域链访问所有的外部环境，但外部环境不能访问内部环境中的任何变量和函数。
+
+函数参数也被当作变量来对待，因此其访问规则与执行环境中的其他变量相同。
+
+<br>
+
+***2. 作用域链的延长***
+
+当执行流进入下列任何一个语句时，作用域链就会得到加长：
+
+- try-catch 语句的 catch 块；
+- with 语句；
+
+这两个语句都会在作用域链的前端添加一个变量对象。对 `with` 语句来说，会将指定的对象添加到作用域链中。对 `catch` 语句来说，会创建一个新的变量对象，其中包含的是被抛出的错误对象的声明。
+
+<br>
+
+***3. 没有块级作用域***
+
+在其他类 C 的语言中，由花括号封闭的代码块都有自己的作用域，JavaScript 没有块级作用域，举例如下：
+
+```js
+// 例一：if语句中定义的变量color，在if语句执行完后不会被销毁
+if (true) {
+  var color = "blue";
+}
+alert(color);   //"blue"
+```
+
+```js
+// 例二：for语句中定义的变量i，在for语句执行完后不会被销毁
+for (var i=0; i < 10; i++){
+  doSomething(i);
+}
+alert(i);       //10
+```
+
+对于有块级作用域的语言来说，`for` 语句初始化变量的表达式所定义的变量，只会存在于循环的环境之中。而对于 JavaScript 来说，由 `for` 语句创建的变量 i 即使在 `for` 循环执行结束后，也依旧会存在于循环外部的执行环境中。
+
+<br>
+
+- **声明变量：**
+
+使用 `var` 声明的变量会自动被添加到最接近的环境中。如果初始化变量时没有使用 `var` 声明，该变量会自动被添加到全局环境。
+
+> 在编写 JavaScript 代码的过程中，不声明而直接初始化变量是一个常见的错误做 法，因为这样可能会导致意外。
+
+<br>
+
+***4. 垃圾收集***
+
+JavaScript 具有自动垃圾收集机制，执行环境会负责管理代码执行过程中使用的内存。
+
+**原理**：找出那些不再继续使用的变量，然后释放其占用的内存。垃圾收集器会按照固定的时间间隔（或代码执行中预定的收集时间），周期性地执行这一操作。
+
+<br>
+
+- **标记清除：**
+
+JavaScript 中最常用的垃圾收集方式是 **标记清除**（mark-and-sweep）。当变量进入环境（例如，在函数中声明一个变量）时，就将这个变量标记为“进入环境”，而当变量离开环境时，则将其标记为“离开环境”。
+
+<br>
+
+- **引用计数：**
+
+引用计数的含义是跟踪记录每个值被引用的次数，当代码中存在循环引用现象时，“引用计数”算法就会导致问题。这是一种不太常见的垃圾收集策略，JavaScript 引擎目前都不再使用这种算法。
+
+<br>
+
+- **性能问题：**
+
+垃圾收集器是周期性运行的，如果为变量分配的内存数量很可观，那么回收工作量也是相当大。在这种情况下，确定垃圾收集的时间间隔是一个非常重要的问题。
+
+<br>
+
+- **管理内存：**
+
+通常来说分配给 Web 浏览器的可用内存数量通常要比分配给桌面应用程序的少。这样做的目的主要是出于安全方面的考虑，目的是防止运行 JavaScript 的网页耗尽全部系统内存而导致系统崩溃。
+
+**解除引用**（dereferencing）：为确保占用最少的内存获得更好的性能，最佳方式就是为执行中的代码只保存必要的数据，一旦数据不再有用，最好通过将其值设置为 `null` 来释放其引用。这一做法适用于大多数全局变量和全局对象的属性。
+
+这一做法称为解除引用，举例如下
+
+```js
+function createPerson(name){
+  var localPerson = new Object();
+  localPerson.name = name;
+  return localPerson;
+}
+var globalPerson = createPerson("Nicholas");
+
+// 手工解除 globalPerson 的引用
+globalPerson = null;
+```
+
+解除一个值的引用并不意味着自动回收该值所占用的内存。**<u><font color="#282828">解除引用的真正作用是让值脱离执行环境，以便垃圾收集器下次运行时将其回收</font></u>**。
+
+<br>
+
+## 第五章 引用类型
+
+引用类型的值（对象）是引用类型的一个实例。**<u><font color="red">在 ECMAScript 中，引用类型是一种数据结构，用于将数据和功能组织在一起</font></u>**。
+
+<br>
+
+### 一、Object 类型
+
+Object 也是 `ECMAScript` 中使用最多的一个类型。创建 Object 实例的方法有两种：
+
+- 使用 new 操作符后跟 Object 构造函数;
+- 使用 **对象字面量** 表示法；
 
 
 
-
-
-
-
-
-
-**<u><font color="#282828">样例</font></u>**
+**<u><font color="red">样例红</font></u>**
+**<u><font color="#282828">样例黑</font></u>**
