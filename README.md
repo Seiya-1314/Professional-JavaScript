@@ -19,6 +19,10 @@
 		* [四、RegExp 类型](#四-regexp-类型)
 		* [五、Function 类型](#五-function-类型)
 		* [六、基本包装类型](#六-基本包装类型)
+	* [第六章 面向对象的程序设计](#第六章-面向对象的程序设计)
+		* [一、理解对象](#一-理解对象)
+		* [二、创建对象](#二-创建对象)
+		* [三、继承](#三-继承)
 
 <!-- /code_chunk_output -->
 
@@ -804,7 +808,7 @@ var sum = function(num1, num2){
   每个包装类型都映射到同名的基本类型；
   在读取模式下访问基本类型值时，就会创建对应的基本包装类型的一个对象，从而方便了数据 操作；
   操作基本类型值的语句一经执行完毕，就会立即销毁新创建的包装对象。
- ```
+```
 
 <br>
 <br>
@@ -819,6 +823,7 @@ var sum = function(num1, num2){
 每个对象都是基于一个引用类型创建的，这个引用类型可以是第 5 章讨论的原生类型，也可以是开发人员定义的类型。
 
 <br>
+
 
 ### 一、理解对象
 
@@ -855,6 +860,280 @@ ECMA-262 第 5 版在定义只有内部才用的特性（attribute）时，描�
  [[Get]]：在读取属性时调用的函数。默认值为 undefined。
  [[Set]]：在写入属性时调用的函数。默认值为 undefined。
 ```
+
+<br>
+
+### 二、创建对象
+
+虽然 Object 构造函数或对象字面量都可以用来创建单个对象，但这些方式有个明显的缺点：**使用同一个接口创建很多对象，会产生大量的重复代码**。为解决这个问题，人们开始使用工厂模式的一种变体。
+
+<br>
+
+***1. 工厂模式***
+
+工厂模式是软件工程领域一种广为人知的设计模式，这种模式抽象了创建具体对象的过程.考虑到在 ECMAScript 中无法创建类，开发人员就发明了一种函数，用函数来封装以特定接口创建对象的细节，如下面的例子所示:
+
+```js
+function createPerson(name, age, job){
+  var o = new Object();
+  o.name = name;
+  o.age = age;
+  o.job = job;
+  o.sayName = function(){
+	  alert(this.name);
+  };
+  return o;
+}
+
+var person1 = createPerson("Nicholas", 29, "Software Engineer");
+var person2 = createPerson("Greg", 27, "Doctor");
+```
+
+工厂模式虽然解决了创建多个相似对象的问题，但却没有解决对象识别的问题（即怎样知道一个对象的类型）。随着 JavaScript 的发展，又一个新模式出现了。
+
+<br>
+
+***2. 构造函数模式***
+
+<br>
+
+- **构造函数:**
+
+可以创建自定义的构造函数，从而定义自定义对象类型的属性和方法。例如，可以使用构造函数模式将前面的例子重写如下:
+
+```js
+function Person(name, age, job){
+  this.name = name;
+  this.age = age;
+  this.job = job;
+  this.sayName = function(){
+    alert(this.name);
+  };
+}
+
+var person1 = new Person("Nicholas", 29, "Software Engineer");
+var person2 = new Person("Greg", 27, "Doctor");
+```
+
+这个例子中，Person()函数取代了createPerson()函数。他们存在以下不同之处：
+
+	- 没有显式地创建对象；
+
+	- 直接将属性和方法赋给了 this 对象；
+
+	- 没有 return 语句；
+
+	- 函数名 Person 使用的是大写字母 P（主要是为了 区别于 ECMAScript 中的其他函数；因为构造函数本身也是函数，只不过可以用来创建对象而已）；
+
+<br>
+
+要创建 Person 的新实例，必须使用 new 操作符。以这种方式调用构造函数实际上会经历以下 4 个步骤：
+
+	- (1) 创建一个新对象；
+
+	- (2) 将构造函数的作用域赋给新对象（因此 this 就指向了这个新对象）；
+
+	- (3) 执行构造函数中的代码（为这个新对象添加属性）；
+
+	- (4) 返回新对象；
+
+**<u><font color="red">创建自定义的构造函数意味着将来可以将它的实例标识为一种特定的类型；而这正是构造函数模式胜过工厂模式的地方</font></u>**。
+
+<br>
+
+- **构造函数也是函数:**
+
+构造函数与其他函数的唯一区别，就在于调用它们的方式不同。
+
+**<u><font color="#282828">任何函数，只要通过 new 操作符来调用，那它就可以作为构造函数；而任何函数，如果不通过 new 操作符来调用，那它跟普通函数也不会有什么两样。</font></u>**
+
+<br>
+
+- **构造函数的问题:**
+
+使用构造函数的主要问题，就是每个方法都要在每个实例上重新创建一遍。
+
+<br>
+
+***3. 原型模式***
+
+<br>
+
+我们创建的每个函数都有一个 prototype（原型）属性，这个属性是一个指针，指向一个对象， 而这个对象的用途是包含可以由特定类型的所有实例共享的属性和方法。
+
+使用原型对象的好处是可以让所有对象实例共享它所包含的属性和方法。换句话说，不必在构造函数中定义对象实例的信息，而是可以将这些信息直接添加到原型对象中，如下面的例子所示：
+
+```js
+function Person(){}
+
+Person.prototype.name = "Nicholas";
+Person.prototype.age = 29;
+Person.prototype.job = "Software Engineer";
+Person.prototype.sayName = function(){
+  alert(this.name);
+};
+
+var person1 = new Person();
+person1.sayName();   //"Nicholas"
+
+var person2 = new Person();
+person2.sayName();   //"Nicholas"
+alert(person1.sayName == person2.sayName);  //true
+```
+
+**与构造函数模式不同的是，新对象的这些属性和方法是由所有实例共享的**。
+
+<br>
+
+***4. 组合使用构造函数模式和原型模式***
+
+<br>
+
+创建自定义类型的最常见方式，就是组合使用构造函数模式与原型模式。构造函数模式用于定义实例属性，而原型模式用于定义方法和共享的属性。它有两个好处:
+
+	- 每个实例都会有自己的一份实例属性的副本， 但同时又共享着对方法的引用，最大限度地节省了内存;
+
+	- 这种混成模式还支持向构造函数传递参数;
+
+举例如下：
+
+```js
+function Person(name, age, job){
+  this.name = name;
+  this.age = age;
+  this.job = job;
+  this.friends = ["Shelby", "Court"];
+}
+
+Person.prototype = {
+  constructor : Person,
+  sayName : function(){
+    alert(this.name);
+  }
+}
+
+var person1 = new Person("Nicholas", 29, "Software Engineer");
+var person2 = new Person("Greg", 27, "Doctor");
+
+person1.friends.push("Van");
+
+alert(person1.friends); //"Shelby,Count,Van"
+alert(person2.friends); //"Shelby,Count"
+alert(person1.friends === person2.friends); //false
+alert(person1.sayName === person2.sayName); //true
+```
+
+这种构造函数与原型混成的模式，是目前在 ECMAScript 中使用最广泛、认同度最高的一种创建自定义类型的方法。可以说，这是用来定义引用类型的一种默认模式。
+
+<br>
+
+***5. 动态原型模式***
+
+<br>
+
+动态原型模式把所有信息都封装在了构造函数中，通过在构造函数中初始化原型（仅在必要的情况下），又保持了同时使用构造函数和原型的优点
+
+<br>
+<br>
+
+### 三、继承
+
+继承是 `OO` 语言中的一个最为人津津乐道的概念。许多 `OO` 语言都支持两种继承方式：<strong>接口继承</strong> 和 <strong>实现继承</strong>。如前所述，由于函数没有签名，所以无法实现接口继承。ECMAScript 只支持实现继承，而且其实现继承主要是依靠原型链来实现的。
+
+<br>
+
+***1. 原型链***
+
+<br>
+
+基本思想是利用原型让一个引用类型继承另一个引用类型的属性和方法。本质是重写原型对象，代之以一个新类型的实例。
+
+- **原型链的问题：**
+
+	- 问题一：在通过原型来实现继承时，原型实际上会变成另一个类型的实例。于是，原先的实例属性也就顺理成章地变成了现在的原型属性了。
+
+	- 问题二：应该没有办法在不影响所有对象实例的情况下，给超类型的构造函数传递参数。
+
+<br>
+
+***2. 借用构造函数（伪造对象或经典继承）***
+
+<br>
+
+在子类型构造函数的内部调用超类型构造函数。如下所示：
+
+```js
+function SuperType(name){
+	this.name = name;
+}
+
+function SubType(){
+//继承了 SuperType，同时还传递了参数
+  SuperType.call(this, "Nicholas");
+
+//实例属性
+  this.age = 29;
+}
+
+var instance = new SubType();
+alert(instance.name);    //"Nicholas";
+alert(instance.age);     //29
+```
+
+相对于原型链而言，借用构造函数有一个很大的优势，即可以在子类型构造函数中向超类型构造函数传递参数。
+
+<br>
+
+- **借用构造函数的问题:**
+
+	- 方法都在构造函数中定义，因此函数复用就无从谈起了。
+
+	- 在超类型的原型中定义的方法，对子类型而言也是不可见的，结 果所有类型都只能使用构造函数模式。
+
+<br>
+
+***3. 组合继承(伪经典继承)***
+
+<br>
+
+将原型链和借用构造函数的技术组合到一块，从而发挥二者之长的一种继承模式。背后的思路是使用原型链实现对原型属性和方法的继承，而通过借用构造函数来实现对实例属性的继承。举例如下：
+
+```js
+function SuperType(name){
+  this.name = name;
+  this.colors = ["red", "blue", "green"];
+}
+
+SuperType.prototype.sayName = function(){
+  alert(this.name);
+};
+
+function SubType(name, age){
+  //继承属性
+  SuperType.call(this, name);
+
+  this.age = age;
+}
+
+//继承方法
+SubType.prototype = new SuperType(); SubType.prototype.constructor = SubType;
+SubType.prototype.sayAge = function(){
+  alert(this.age);
+};
+
+var instance1 = new SubType("Nicholas", 29); instance1.colors.push("black");
+alert(instance1.colors);        //"red,blue,green,black"
+instance1.sayName();            //"Nicholas";
+instance1.sayAge();             //29
+
+var instance2 = new SubType("Greg", 27);
+alert(instance2.colors);       //"red,blue,green"
+instance2.sayName();           //"Greg";
+instance2.sayAge();            //27
+```
+
+**<u><font color="red">组合继承避免了原型链和借用构造函数的缺陷，融合了它们的优点，成为 JavaScript 中最常用的继承模式</font></u>** 。而且，instanceof 和 isPrototypeOf()也能够用于识别基于组合继承创建的对象。
+
 
 
 
