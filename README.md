@@ -23,6 +23,11 @@
 		* [一、理解对象](#一-理解对象)
 		* [二、创建对象](#二-创建对象)
 		* [三、继承](#三-继承)
+	* [第七章 函数表达式](#第七章-函数表达式)
+		* [一、递归](#一-递归)
+		* [二、闭包](#二-闭包)
+		* [三、模仿块级作用域](#三-模仿块级作用域)
+		* [四、私有变量](#四-私有变量)
 
 <!-- /code_chunk_output -->
 
@@ -957,8 +962,6 @@ var person2 = new Person("Greg", 27, "Doctor");
 
 ***3. 原型模式***
 
-<br>
-
 我们创建的每个函数都有一个 prototype（原型）属性，这个属性是一个指针，指向一个对象， 而这个对象的用途是包含可以由特定类型的所有实例共享的属性和方法。
 
 使用原型对象的好处是可以让所有对象实例共享它所包含的属性和方法。换句话说，不必在构造函数中定义对象实例的信息，而是可以将这些信息直接添加到原型对象中，如下面的例子所示：
@@ -986,8 +989,6 @@ alert(person1.sayName == person2.sayName);  //true
 <br>
 
 ***4. 组合使用构造函数模式和原型模式***
-
-<br>
 
 创建自定义类型的最常见方式，就是组合使用构造函数模式与原型模式。构造函数模式用于定义实例属性，而原型模式用于定义方法和共享的属性。它有两个好处:
 
@@ -1029,8 +1030,6 @@ alert(person1.sayName === person2.sayName); //true
 
 ***5. 动态原型模式***
 
-<br>
-
 动态原型模式把所有信息都封装在了构造函数中，通过在构造函数中初始化原型（仅在必要的情况下），又保持了同时使用构造函数和原型的优点
 
 <br>
@@ -1044,8 +1043,6 @@ alert(person1.sayName === person2.sayName); //true
 
 ***1. 原型链***
 
-<br>
-
 基本思想是利用原型让一个引用类型继承另一个引用类型的属性和方法。本质是重写原型对象，代之以一个新类型的实例。
 
 - **原型链的问题：**
@@ -1057,8 +1054,6 @@ alert(person1.sayName === person2.sayName); //true
 <br>
 
 ***2. 借用构造函数（伪造对象或经典继承）***
-
-<br>
 
 在子类型构造函数的内部调用超类型构造函数。如下所示：
 
@@ -1093,8 +1088,6 @@ alert(instance.age);     //29
 <br>
 
 ***3. 组合继承(伪经典继承)***
-
-<br>
 
 将原型链和借用构造函数的技术组合到一块，从而发挥二者之长的一种继承模式。背后的思路是使用原型链实现对原型属性和方法的继承，而通过借用构造函数来实现对实例属性的继承。举例如下：
 
@@ -1134,14 +1127,340 @@ instance2.sayAge();            //27
 
 **<u><font color="red">组合继承避免了原型链和借用构造函数的缺陷，融合了它们的优点，成为 JavaScript 中最常用的继承模式</font></u>** 。而且，instanceof 和 isPrototypeOf()也能够用于识别基于组合继承创建的对象。
 
+<br>
 
+***4. 原型式继承***
 
+ECMAScript5 通过新增 Object.create()方法规范化了原型式继承。这个方法接收两个参数：一个用作新对象原型的对象和（可选的）一个为新对象定义额外属性的对象。
 
+```js
+var person = {
+  name: "Nicholas",
+  friends: ["Shelby", "Court", "Van"]
+};
 
+// 在传入一个参数的情况下，Object.create() 与 object()方法的行为相同。
+var anotherPerson = Object.create(person);
+anotherPerson.name = "Greg";
+anotherPerson.friends.push("Rob");
 
+var yetAnotherPerson = Object.create(person);
+yetAnotherPerson.name = "Linda";
+yetAnotherPerson.friends.push("Barbie");
 
+alert(person.friends);     //"Shelby,Court,Van,Rob,Barbie"
 
+// 以这种方式指定的任何属性都会覆盖原型对象上的同名属性。
+var finalPerson = Object.create(person, {
+  name: { value: "Greg" }
+});
 
+alert(finalPerson.name);  //"Greg"
+```
+
+在没有必要兴师动众地创建构造函数，而只想让一个对象与另一个对象保持类似的情况下，原型式继承是完全可以胜任的。不过别忘了，包含引用类型值的属性始终都会共享相应的值，就像使用原型模式一样。
+
+<br>
+
+***5. 寄生式继承***
+
+寄生式继承的思路与寄生构造函数和工厂模式类似，即创建一个仅用于封装继承过程的函数，该函数在内部以某种方式来增强对象，最后再像真地是它做了所有工作一样返回对象。举例如下：
+
+```js
+function createAnother(original){
+  var clone = object(original);    // 通过调用函数创建一个新对象
+  clone.sayHi = function(){        // 以某种方式来增强这个对象
+    alert("hi");
+  };
+  return clone;                    // 返回这个对象
+}
+
+var person = {
+  name: "Nicholas",
+  friends: ["Shelby", "Court", "Van"]
+};
+
+var anotherPerson = createAnother(person);
+anotherPerson.sayHi();             //"hi"
+```
+
+在主要考虑对象而不是自定义类型和构造函数的情况下，寄生式继承也是一种有用的模式。**使用寄生式继承来为对象添加函数，会由于不能做到函数复用而降低效率；这一点与构造函数模式类似**。
+
+<br>
+
+***6. 寄生组合式继承***
+
+所谓寄生组合式继承，即通过借用构造函数来继承属性，通过原型链的混成形式来继承方法。本质上，就是 **<u><font color="red">使用寄生式继承来继承超类型的原型，然后再将结果指定给子类型的原型</font></u>** 。
+
+```js
+function inheritPrototype(subType, superType){
+  var prototype = object(superType.prototype);  //创建对象
+  prototype.constructor = subType;              //增强对象
+  subType.prototype = prototype;                //指定对象
+}
+
+function SuperType(name){
+  this.name = name;
+  this.colors = ["red", "blue", "green"];
+}
+
+SuperType.prototype.sayName = function(){
+  alert(this.name);
+};
+
+function SubType(name, age){
+  SuperType.call(this, name);
+  this.age = age;
+}
+
+inheritPrototype(SubType, SuperType);
+
+SubType.prototype.sayAge = function(){
+  alert(this.age);
+};
+```
+
+<br>
+<br>
+<br>
+<br>
+<br>
+
+## 第七章 函数表达式
+
+在 JavaScript 编程中，函数表达式是一种非常有用的技术。使用函数表达式可以无须对函数命名，从而实现动态编程。
+
+<br>
+
+**函数表达式的特点：**
+
+- 函数表达式不同于函数声明。函数声明要求有名字，但函数表达式不需要。没有名字的函数表达式也叫做匿名函数；
+
+- 在无法确定如何引用函数的情况下，递归函数就会变得比较复杂;
+
+- 递归函数应该始终使用 arguments.callee 来递归地调用自身，不要使用函数名——函数名可能会发生变化；
+
+<br>
+
+### 一、递归
+
+递归函数是在一个函数通过名字调用自身的情况下构成的，如下所示：
+
+```js
+function factorial(num){
+  if (num <= 1){ return 1; }
+  else {
+    return num * factorial(num-1);
+  }
+}
+```
+
+这是一个经典的递归阶乘函数。虽然这个函数表面看来没什么问题，但下面的代码却可能导致它出错:
+
+```js
+var anotherFactorial = factorial;
+factorial = null;
+alert(anotherFactorial(4));     //出错！
+```
+
+调用 anotherFactorial()时，由于必须执行 factorial()，而 factorial 已经不再是函数，所以就会导致错误。在这种情况下，使用 `argu-ments.callee` 可以解决这个问题。**<u><font color="red">arguments.callee 是一个指向正在执行的函数的指针</font></u>**
+
+```js
+function factorial(num){
+  if (num <= 1){ return 1; }
+  else {
+    return num * arguments.callee(num-1);
+  }
+}
+```
+
+<br>
+
+### 二、闭包
+
+**<u><font color="#282828">闭包是指有权访问另一个函数作用域中的变量的函数</font></u>** 。创建闭包的常见方式，就是在一个函数内部创建另一个函数，如下：
+
+```js
+function createComparisonFunction(propertyName) {
+  return function(object1, object2){
+    var value1 = object1[propertyName];
+    var value2 = object2[propertyName];
+
+    if (value1 < value2){
+      return -1;
+    } else if (value1 > value2){
+      return 1;
+    } else {
+      return 0;
+    }
+  };
+}
+```
+
+<br>
+
+***1. 闭包与变量***
+
+**<u><font color="#282828">闭包只能取得包含函数中任何变量的最后一个值。别忘了闭包所保存的是整个变量对象，而不是某个特殊的变量</font></u>**。
+
+```js
+function createFunctions(){
+  var result = new Array();
+  for (var i=0; i < 10; i++){
+    result[i] = function(){ return i; };
+  }
+  return result;
+}
+```
+
+表面上看，似乎每个函数都应该返自己的索引值。但实际上，每个函数都返回10。因为每个函数的作用域链中都保存着createFunctions()函数的活动对象，所以它们引用的都是同一个变量i。当createFunctions()函数返回后，变量i的值是10，此时每个函数都引用着保存变量i的同一个变量对象，所以在每个函数内部i的值都是10。我们可以通过创建另一个匿名函数强制让闭包的行为符合预期，如下所示:
+
+```js
+function createFunctions(){
+  var result = new Array();
+  for (var i=0; i < 10; i++){
+    result[i] = function(num){
+      return function(){
+        return num;
+      };
+    }(i);
+  }
+  return result;
+}
+```
+
+<br>
+
+***2. 关于 this 对象***
+
+匿名函数的执行环境具有全局性，因此其 this 对象通常指向 window 。但有时候由于编写闭包的方式不同，这一点可能不会那么明显。如下图所示：
+
+```js
+var name = "The Window";
+var object = {
+  name : "My Object",
+  getNameFunc : function(){
+    var that = this;
+    return function(){ return that.name; };
+  }
+};
+alert(object.getNameFunc()());   //"My Object"
+```
+
+在定义匿名函数之前，我们把 this 对象赋值给了一个名叫 that 的变量。而在定义了闭包之后，闭包也可以访问这个变量，因为它是我们在包含函数中特意声名的一个变量。 即使在函数返回之后，that 也仍然引用着 object.
+
+**<u><font color="#282828">this 和 arguments 也存在同样的问题。如果想访问作用域中的 arguments 对象，必须将对该对象的引用保存到另一个闭包能够访问的变量中</font></u>**。
+
+<br>
+
+### 三、模仿块级作用域
+
+JavaScript没有块级作用域的概念。这意味着在块语句中定义的变量，实际上是在包含 函数中而非语句中创建的。
+
+JavaScript从来不会告诉你是否多次声明了同一个变量；遇到这种情况，它只会对后续的声明视而不见（不过，它会执行后续声明中的变量初始化）。匿名函数可以用来模仿块级作用域并避免这个问题。语法如下所示：
+
+```js
+(function(){
+  //这里是块级作用域
+})();
+```
+
+将函数声明包含在一对圆括号中，表示它实际上是一个函数表达式。而紧随其后的另一对圆括号会立即调用这个函数。
+
+这种做法可以减少闭包占用的内存问题，因为没有指向匿名函数的引用。只要函数执行完毕，就可以立即销毁其作用域链了。
+
+<br>
+
+### 四、私有变量
+
+严格来讲，JavaScript 中没有私有成员的概念；所有对象属性都是公有的。不过有一个私有变量的概念。任何在函数中定义的变量，都可以认为是私有变量，因为不能在函数的外部访问这些变量。
+
+**如果在一个函数内部创建一个闭包，那么闭包通过自己的作用域链可以在函数外部访问函数内部变量**。利用这一点，我们可以创建用于访问私有变量的公有方法：
+
+<br>
+
+***1. 特权方法***
+
+**<u><font color="red">有权访问私有变量和私有函数的公有方法</font></u>**。
+
+- 在构造函数中定义特权方法：
+
+```js
+function MyObject(){
+  //私有变量和私有函数
+  var privateVariable = 10;
+  function privateFunction(){ return false; }
+
+  //特权方法
+  this.publicMethod = function (){
+    privateVariable++;
+    return privateFunction();
+  };
+}
+```
+
+在构造函数中定义特权方法也有一个缺点，那就是你必须使用构造函数模式来达到这个目的。构造函数模式的缺点是针对每个实例都会创建同样一组新方法，而使用静态私有变量来实现特权方法就可以避免这个问题。
+
+<br>
+
+- 在私有作用域中定义私有变量或函数：
+
+```js
+(function(){
+  // 私有变量和私有函数
+  var privateVariable = 10;
+  function privateFunction(){ return false; }
+  // 构造函数
+  MyObject = function(){ };
+  // 公有/特权方法
+  MyObject.prototype.publicMethod = function(){
+    privateVariable++;
+    return privateFunction();
+  };
+})();
+```
+
+这个模式在定义构造函数时并没有使用函数声明，而是使用了函数表达式。函数声明只能创建局部函数,出于同样的原因，也没有在声明 MyObject 时使用 var 关键字。记住：初始化未经声明的变量，总是会创建一个全局变量。因此，MyObject就成了一个全局变量，能够在私有作用域之外被访问到。
+
+这个模式与在构造函数中定义特权方法的主要区别:**私有变量和函数是由实例共享的，由于特权方法是在原型上定义的，因此所有实例都使用同一个函数**。而这个特权方法，作为一个闭包，总是保存着对包含作用域的引用。
+
+以这种方式创建静态私有变量会因为使用原型而增进代码复用，但每个实例都没有自己的私有变量。到底是使用实例变量，还是静态私有变量，最终还是要视你的具体需求而定。
+
+<br>
+
+***2. 模块模式***
+
+前面的模式是用于为自定义类型创建私有变量和特权方法的。而模块模式（module pattern）则是为单例创建私有变量和特权方法。**<u><font color="#282828">所谓单例（singleton），指的就是只有一个实例的对象</font></u>**。
+
+JavaScript 是以对象字面量的方式来创建单例对象的，如下：
+
+```js
+var singleton = {
+  name : value,
+  method : function () {
+    // 这里是方法的代码
+  }
+};
+```
+
+模块模式通过为单例添加私有变量和特权方法能够使其得到增强，其语法形式如下：
+
+```js
+var singleton = function(){
+  // 私有变量和私有函数
+  var privateVariable = 10;
+  function privateFunction(){ return false; }
+	
+  // 特权/公有方法和属性
+  return {
+    publicProperty: true,
+    publicMethod : function(){
+      privateVariable++;
+      return privateFunction();
+    }
+  };
+}();
+```
 
 
 
