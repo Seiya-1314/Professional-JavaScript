@@ -28,6 +28,7 @@
 		* [二、闭包](#二-闭包)
 		* [三、模仿块级作用域](#三-模仿块级作用域)
 		* [四、私有变量](#四-私有变量)
+	* [第八章 BOM](#第八章-bom)
 
 <!-- /code_chunk_output -->
 
@@ -1450,7 +1451,7 @@ var singleton = function(){
   // 私有变量和私有函数
   var privateVariable = 10;
   function privateFunction(){ return false; }
-	
+
   // 特权/公有方法和属性
   return {
     publicProperty: true,
@@ -1461,6 +1462,62 @@ var singleton = function(){
   };
 }();
 ```
+
+<br>
+<br>
+<br>
+<br>
+<br>
+
+## 第八章 BOM
+
+BOM：浏览器对象模型
+
+BOM 提供了很多对象，用于访问浏览器的功能，这些功能与任何网页内容无关。
+
+<br>
+
+1. **window 对象**
+
+	window 是 BOM 的核心对象，它表示浏览器的一个实例。在浏览器中，window 对象有双重角色，它既是通过 JavaScript 访问浏览器窗口的一个接口，又是 ECMAScript 规定的 Global 对象。
+
+	<br>
+
+2. **location 对象**
+
+	navigator 对象提供了与浏览器有关的信息。到底提供哪些信息，很大程度上取决于用户的浏览器；不过，也有一些公共的属性（如 userAgent）存在于所有浏览器中。
+
+	<br>
+
+3. **navigator 对象**
+
+	location 对象是很特别的一个对象，因为它既是 window 对象的属性，也是 document 对象的属性。它提供了与当前窗口中加载的文档有关的信息，还提供了一些导航功能。
+
+	<br>
+
+4. **screen 对象**
+
+	screen 对象基本上只 用来表明客户端的能力，其中包括浏览器窗口外部的显示器的信息，如像素宽度和高度等。
+
+	<br>
+
+5. **history 对象**
+
+	history 对象保存着用户上网的历史记录，从窗口被打开的那一刻算起。因为 history 是 window 对象的属性，因此每个浏览器窗口、每个标签页乃至每个框架，都有自己的 history 对象与特定的 window 对象关联。
+
+<br>
+<br>
+<br>
+<br>
+<br>
+
+## 第九章 BOM
+
+
+
+
+
+
 
 
 
